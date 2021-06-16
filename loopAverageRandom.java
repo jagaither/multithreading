@@ -10,16 +10,20 @@ public class loopAverageRandom {
 
 	static long timeSum = 0;
 	static long timeAverage = 0;
+	static long sum = 0;
 	
 	static Random random = new Random();
+	
 	static int max = 214783647;
 	static int min = -214783647;
+	static int count = 0;
 	
 	private static List<Integer> numList = new ArrayList<Integer>();
-	static int count = 0;
+	
 	
 	public synchronized static void addRandInt(){
 		numList.add(random.nextInt(max - min) + min);	
+		sum += random.nextInt(max - min) + min;
 		count++;
 	}
 	
@@ -52,33 +56,25 @@ public class loopAverageRandom {
 		    }
 		    long tok = System.nanoTime();
 		
-		
-	    	long sum = 0;
-		
-		    long tik2 = System.nanoTime();
-            for(int i=0; i<1000000; i++) {						// getting sum
-        	    sum += numList.get(i);
-            }
-            long average = sum/1000000;
-		    long tok2 = System.nanoTime();
-		
-		
 	    	long time = tok-tik;
-		    long time2 = tok2-tik2;
-		
+
 		    timeSum += time;
+		    
+		    long average = sum/1000000;
 		
 		    System.out.println("Array of size " + numList.size());
-		    //System.out.println("Average value of random list is " + average);
+		    System.out.println("Average value of random list is " + average);
 		    System.out.println("Execution time of data entry is " + time + " nanoseconds, or " + time/1000000 + " milliseconds");
 		    //System.out.println("Execution time of averaging is " + time2 + " nanoseconds, or " + time2/1000000 + " milliseconds");
 		    count = 0;
 		    sum = 0;
-		    //random = new Random();
 		    
 		}
 		timeSum = timeSum/1000000;
 		timeAverage = timeSum/100;
+	
+		
+		System.out.println("Array of size " + numList.size());
 		System.out.println("Average time over 100 runs is " + timeAverage + " milliseconds");
 	}
 	
