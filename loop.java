@@ -3,21 +3,17 @@ package unsynchronized;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;  
 
 public class loop {
 	
-	static Random random = new Random();
-	
-	//private static int numArr[] = new int[1000000];				//changed numList to numArr so that elements can be changed and accessed faster with a larger dataset
-	static long sum = 0;	
+	private final static int milHold = 1000000;
 	static long timeSum = 0;
 	static long timeAverage = 0;
-	static int randNum = 0;
-    static int remainder = 0;
+    int remainder = 0;
 	static int maxIndiCount = 0;
     static int countListIndex = 0;
-	static int originalN = 0;
+	private static int originalN = 0;
 	
 	static boolean flag = false;
     
@@ -28,26 +24,26 @@ public class loop {
 		System.out.println("Please give an integer N for the number of threads");		//Receive integer input from the user for number of threads
 		int N = scan.nextInt();
 		originalN = N;
-		while((1000000 % N)!=0) {								//MAKES N EVENLY DIVISIBLE INTO 1 MILLION
+		while((milHold % N)!=0) {														//MAKES N EVENLY DIVISIBLE INTO 1 MILLION
 			N++;
 			flag = true;
 		}
-		if(flag==true) {										//bool flag to see if input from user has been altered to be evenly divisible
-			System.out.println("Original number of threads has been changed to be evenly divisible into 1,000,000 for equal workload between threads");
+		if(flag==true) {																//bool flag to see if input from user has been altered to be evenly divisible
+			System.out.println("Original number of threads has been changed from " + originalN +"to be evenly divisible into 1,000,000 for equal workload between threads");
 			System.out.println("New number of threads is: " + N);
 		}
-		maxIndiCount = 1000000/N;								//obtain max count for each thread so that they share workload equally
+		maxIndiCount = milHold/N;														//obtain max count for each thread so that they share workload equally
 		
-		//List<Integer> countList = new ArrayList<Integer>();		//Initialize countList so that each thread can maintain its own count to 
-		//int incrementVal = 0;
-		//for(int i=0; i<N; i++) {								//eliminate synchronization and extra function calls
-		//	countList.add(incrementVal);
-		//	incrementVal += maxIndiCount;
-		//}
-		
-		for(int k=0; k<100; k++) {
-			int numArr[] = new int[1000000];
-		  
+		System.out.println("Please give an integer for the number of loops to run random data entry for");
+		int numLoops = scan.nextInt();
+		//-------------------------------------------------------------------------
+		// BEGINNING OF TIMING PORTION
+		//-------------------------------------------------------------------------
+		for(int k=0; k<numLoops; k++) {
+			int numArr[] = new int[milHold];
+			int sumArr[] = new int[N];
+		    int randHoldArr[] = new int[N];
+			
 			List<Integer> countList = new ArrayList<Integer>();		//Initialize countList so that each thread can maintain its own count to 
 			int incrementVal = 0;
 			for(int i=0; i<N; i++) {								//eliminate synchronization and extra function calls
@@ -62,9 +58,9 @@ public class loop {
 			    myThreads[i] = new Thread(new Runnable(){			//creating an array of size N of threads to enter random integers into numList
 				    public void run(){
 					    while(countList.get(countListIndex) < maxIndiCount){
-						    randNum = random.nextInt();
-						    numArr[countList.get(countListIndex)] = randNum;
-						    sum+=randNum;
+						    randHoldArr[countListIndex] = ThreadLocalRandom.current().nextInt(); //using thread local random and an array matching countList so each 
+						    numArr[countList.get(countListIndex)] = randHoldArr[countListIndex]; //each thread has its own memory location for entry of the random number
+						    sumArr[countListIndex] += randHoldArr[countListIndex];	
 						    countList.set(countListIndex, countList.get(countListIndex)+1);
 					    }
 				    }
@@ -80,17 +76,28 @@ public class loop {
 			    }
 		    }
 		    long tok = System.nanoTime();
+            //-------------------------------------------------------------------------
+            // BEGINNING OF TIMING PORTION
+            //-------------------------------------------------------------------------
+		    
+		    
 		    long time = tok-tik;
 		    timeSum += time;
-            long average = sum/1000000;								//obtain average from sum
-		
+            long average = 0;								//obtain average from sum
+		    for(int j=0; j<N; j++) {
+		    	average+=sumArr[j];
+		    }
+		    
+		    average = average/milHold;
             
 		    System.out.println("Array of size " + numArr.length);
 		    System.out.println("Average value of random list is " + average);
-		    System.out.println("Execution time of data entry is " + time + " nanoseconds, or " + time/1000000 + " milliseconds");
+		    System.out.println("Execution time of data entry is " + time + " nanoseconds, or " + time/milHold + " milliseconds" + '\n');
 		}
-		timeSum = timeSum/1000000;									//Get time sum in nanoseconds to milliseconds
-		timeAverage = timeSum/100;
-		System.out.println("Average time over 100 runs is " + timeAverage + " milliseconds");
+		timeSum = timeSum/milHold;									//Get time sum in nanoseconds to milliseconds
+		timeAverage = timeSum/numLoops;
+		System.out.println('\n' + "Average time over 100 runs is " + timeAverage + " milliseconds");
+		
+		scan.close();
 	}
 }
