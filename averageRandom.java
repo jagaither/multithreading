@@ -75,7 +75,7 @@ public class averageRandom {
 		}
 		long tok = System.nanoTime();
         //-------------------------------------------------------------------------
-        // BEGINNING OF TIMING PORTION
+        // END OF TIMING PORTION
         //-------------------------------------------------------------------------
 		    
 		    
