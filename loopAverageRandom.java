@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;  
 
-public class loop {
+public class loopAverageRandom {
 	
 	private final static int milHold = 1000000;
 	static long timeSum = 0;
